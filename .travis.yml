@@ -1,0 +1,55 @@
+language: c++
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - libstdc++6
+    - lib32stdc++6
+    - zip
+
+env:
+  global:
+    - secure: QJF5M5wX40fnIFqYlRoBycibR3PIoWDUqkThE2HH3q1+sq7SjTssoD1OvNWSmThjc22zpTioZzSiIKRXdI8VKzpOH9Ynqpkg5kY7GMBE7PWfx2ZSAMCBUt6adGJaOgeiCTzj7E6HzxAzW7x9kqmNXGMRiQY6un1iaD5K1MpwkPtTvbVjw2xHzULVjoFDCtkt3wfPxP1BAR4vaPsGRc1/zR3tnuz2YTNp41HD8MERVHlrjOMmcELmBx1mfKHInHNNuG9W7AG/SgMVIn1tTQIeVzd4ee5LVbeILCBo+vM0itdgoTH519vztzX16PH2EWcVLKJUFcf9CAJ5VhNsCGkEKBW65cNMYJ6vkWIU2q69LgxwSZDrwn08lf3DnDd4GOqFSFo6o3kiJ61iDaFK1TiU39Upk0HgiusTRidk1y8+5Ox/okZN/RSUj5WcSxPZ3ftwb0NQ/5MZ65UFHsOuShy8CyH90UZ0x+IQp2MoGPcEOxg4boUl8ggayO/W0tjh5eJ6TfXCEu54coMCF3wCKqENZNXnyoEhxAEgBRowGBDPh2qAzuhjM8ZthWvDbZz0WvhegvbDIuwQ9+kLL8hJiu/P68yk0T2c/emTxLclZxa4sjMaThHMS+5IUytMavHMVD83SxOWrE92WbTYSyjmIR4MYXZE3Xm/00Hols8KxoHEoTQ=
+
+matrix:
+  include:
+  - os: linux
+    env:
+      - ARCH=i686
+      - LIBPATH=/usr/lib32/
+  - os: linux
+    env:
+      - ARCH=x86_64
+      - LIBPATH=/usr/lib/x86_64-linux-gnu/
+  - os: osx
+    env:
+      - ARCH=i686
+  - os: osx
+    env:
+      - ARCH=x86_64
+
+branches:
+  only:
+  - "/^v\\d+(\\.\\d+)+$/"
+
+script:
+  - export TARGET_DIR=bodged-$ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
+  - export FULLT_TARGET_DIR=$TRAVIS_BUILD_DIR/$TARGET_DIR
+  - mkdir -p $FULLT_TARGET_DIR
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      cp $LIBPATH/libstdc++.so.6 $FULLT_TARGET_DIR
+    else
+      cp /usr/lib/libstdc++.dylib $FULLT_TARGET_DIR
+    fi
+  - zip -r $TARGET_DIR.zip $TARGET_DIR
+
+deploy:
+  provider: releases
+  api-key: $GITHUB_TOKEN
+  file: $TARGET_DIR.zip
+  skip_cleanup: true
+  overwrite: true
+  on:
+    tags: true
