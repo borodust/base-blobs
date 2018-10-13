@@ -25,7 +25,8 @@ build_script:
   - set TARGET_ARTIFACT=bodged-%ARCH%-windows-%APPVEYOR_REPO_TAG_NAME%
   - pacman -S --needed --noconfirm base-devel zip %PACKAGES%
   - mkdir %TARGET_ARTIFACT%
-  - sh -c "cp /mingw%BITNESS%/bin/libstdc++-6.dll /mingw64/bin/libgcc_s_seh-1.dll /mingw64/bin/libwinpthread-1.dll $(cygpath -u '%APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%')"
+  - >
+    sh -c "$(cygpath -u '%APPVEYOR_BUILD_FOLDER%')/copy-blobs.sh $(cygpath -u '%APPVEYOR_BUILD_FOLDER%\%TARGET_ARTIFACT%')"
   - zip -r %TARGET_ARTIFACT%.zip %TARGET_ARTIFACT%
 
 artifacts:

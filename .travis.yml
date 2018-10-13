@@ -1,5 +1,6 @@
 language: c++
-sudo: false
+sudo: true
+dist: xenial
 
 addons:
   apt:
@@ -17,32 +18,49 @@ matrix:
   - os: linux
     env:
       - ARCH=i686
-      - LIBPATH=/usr/lib32/
+      - BITNESS=32
   - os: linux
     env:
       - ARCH=x86_64
-      - LIBPATH=/usr/lib/x86_64-linux-gnu/
+      - BITNESS=64
   - os: osx
     env:
       - ARCH=i686
+      - BITNESS=32
   - os: osx
     env:
       - ARCH=x86_64
+      - BITNESS=64
 
 branches:
   only:
   - "/^v\\d+(\\.\\d+)+$/"
 
+before_install:
+  - >
+    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y;
+      sudo apt-get update -q;
+
+      sudo update-alternatives --remove-all gcc;
+      sudo update-alternatives --remove-all g++;
+      sudo -E apt-get -yq --no-install-suggests --no-install-recommends install gcc-8 g++-8 \
+        g++-8-multilib
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 10;
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 10;
+      sudo update-alternatives --set gcc /usr/bin/gcc-8;
+      sudo update-alternatives --set g++ /usr/bin/g++-8;
+    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+       brew update 1>/dev/null 2>&1;
+       brew install gcc@8;
+       brew link --overwrite --force gcc;
+    fi
+
 script:
   - export TARGET_DIR=bodged-$ARCH-$TRAVIS_OS_NAME-$TRAVIS_BRANCH
   - export FULLT_TARGET_DIR=$TRAVIS_BUILD_DIR/$TARGET_DIR
   - mkdir -p $FULLT_TARGET_DIR
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      cp $LIBPATH/libstdc++.so.6 $FULLT_TARGET_DIR
-    else
-      cp /usr/lib/libc++.1.dylib $FULLT_TARGET_DIR
-    fi
+  - $TRAVIS_BUILD_DIR/copy-blobs.sh $FULLT_TARGET_DIR
   - zip -r $TARGET_DIR.zip $TARGET_DIR
 
 deploy:

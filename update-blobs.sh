@@ -19,7 +19,7 @@ for arch in "${!archs[@]}" ; do
     mkdir -p "$target_dir"
     for platform in "${platforms[@]}" ; do
         archive_name=bodged-$arch-$platform-$1
-        archive_path="$script_dir/$archive_name.zip"
+        archive_path=$(mktemp /tmp/$archive_name.XXXXXXXX)
         url="$repository_url/releases/download/$1/$archive_name.zip"
         echo "Downloading blob archive from $url"
         if ! wget -O $archive_path -q "$url" ; then
