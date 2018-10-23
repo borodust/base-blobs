@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+shopt -s nocasematch
+
 if [[ -z  $1 ]] ; then
    echo "Error: Target directory is not provided!"
    exit 1;
