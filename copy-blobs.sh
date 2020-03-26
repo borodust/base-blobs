@@ -41,7 +41,8 @@ elif [ "$PLATFORM" = "windows" ]; then
 
     LIBRARIES="/mingw$BITNESS/bin/libstdc++-6.dll
 /mingw$BITNESS/bin/libgcc_s_seh-1.dll
-/mingw$BITNESS/bin/libwinpthread-1.dll"
+/mingw$BITNESS/bin/libwinpthread-1.dll
+/mingw$BITNESS/bin/libssp-0.dll"
 
 else
     echo "Error: Unrecognized platform $PLATFORM";
